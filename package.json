@@ -1,0 +1,14 @@
+{
+  "name": "takiyu-blog-admin-v2",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "node scripts/build.mjs",
+    "check": "node --check api/admin.js && node --check public/app.js"
+  },
+  "dependencies": {
+    "typescript": "^6.0.3"
+  }
+}

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light dark" />
+  <title>Takiyu Admin</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div id="toast" class="toast" aria-live="polite"></div>
+  <section id="login" class="login-screen">
+    <div class="login-card glass">
+      <div class="brand-mark">T</div>
+      <p class="eyebrow">TAKIYU ADMIN</p>
+      <h1>欢迎回来</h1>
+      <p class="muted">登录后管理文章、相册、日记与整个博客配置。</p>
+      <form id="login-form">
+        <label>管理密码<input id="password" type="password" autocomplete="current-password" placeholder="输入 ADMIN_PASSWORD" required /></label>
+        <button class="primary wide" type="submit">进入管理后台</button>
+      </form>
+      <p class="login-note">密码只发送到你自己的 Vercel 服务端。</p>
+    </div>
+  </section>
+
+  <div id="app" class="app hidden">
+    <header class="topbar">
+      <div class="headline">
+        <p class="eyebrow">TAKIYU ADMIN</p>
+        <h1 id="page-title">文章管理</h1>
+        <span id="repo-badge" class="repo-badge">GitHub repository</span>
+      </div>
+      <nav id="module-nav" class="module-nav" aria-label="管理模块"></nav>
+      <div class="account-actions">
+        <button id="theme-button" class="icon-button" title="切换明暗模式">☼</button>
+        <button id="logout-button" class="account-button"><span class="avatar-mini">T</span><span>Takiyu</span><span class="logout-symbol">↗</span></button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="sidebar glass">
+        <div class="sidebar-actions">
+          <button id="new-button" class="primary">＋ <span>新增条目</span></button>
+          <button id="refresh-button" class="icon-button" title="刷新">↻</button>
+        </div>
+        <div class="search-wrap"><span>⌕</span><input id="search" placeholder="搜索标题、标签、路径或 ID" /></div>
+        <div id="sidebar-note" class="sidebar-note"></div>
+        <div id="side-list" class="side-list"></div>
+      </aside>
+
+      <section class="editor-shell glass">
+        <div id="empty-state" class="empty-state">
+          <div class="empty-icon">✦</div>
+          <h2>选择一个条目开始编辑</h2>
+          <p>也可以点击左侧“新增条目”创建内容。</p>
+        </div>
+        <form id="editor" class="editor hidden"></form>
+      </section>
+    </main>
+  </div>
+
+  <input id="file-picker" type="file" accept="image/*,audio/*" hidden />
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
