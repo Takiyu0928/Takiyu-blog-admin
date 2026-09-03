@@ -10,6 +10,7 @@ const modules = [
 
 const otherSections = [
   { id: "site", label: "网站信息", icon: "♙", count: 2, note: "修改站点标题、网址、功能页面、站长头像、名称、介绍和社交链接。" },
+  { id: "announcement", label: "首页公告", icon: "!", count: 1, note: "编辑初次打开博客时显示的公告标题、正文、样式和跳转链接。" },
   { id: "music", label: "网站音乐", icon: "≋", count: 2, note: "配置网易云歌单、播放器显示方式和本地歌曲列表。" },
   { id: "friends", label: "友链", icon: "♣", count: "array", path: "src/data/friends.ts", variable: "friendsData" },
   { id: "projects", label: "项目展示", icon: "▣", count: "array", path: "src/data/projects.ts", variable: "projectsData" },
@@ -571,7 +572,7 @@ async function deleteDiary() {
 
 async function renderOtherSidebar() {
   els.newButton.innerHTML = "＋ <span>新增条目</span>";
-  els.newButton.classList.toggle("hidden", ["site", "music", "banner", "sidebar"].includes(state.otherSection));
+  els.newButton.classList.toggle("hidden", ["site", "announcement", "music", "banner", "sidebar"].includes(state.otherSection));
   const entries = await Promise.all(otherSections.map(async item => {
     let count = item.count;
     if (item.count === "array" || item.count === "object") {
@@ -592,6 +593,7 @@ async function openOther(id, force = false) {
   state.selected = id;
   await renderOtherSidebar();
   if (id === "site") return openSite(force);
+  if (id === "announcement") return openAnnouncement(force);
   if (id === "music") return openMusic(force);
   if (id === "banner") return openBanner(force);
   if (id === "navbar") return openNavbar(force);
@@ -653,6 +655,54 @@ async function saveSite() {
   await saveModel(model.site, "更新网站基本信息");
   await saveModel(model.profile, "更新站长资料与社交链接");
   await openSite(true); toast("网站信息已保存并提交。");
+}
+
+async function openAnnouncement(force = false) {
+  setBusy(true);
+  try {
+    const model = await readModel("src/config/announcementConfig.ts", "announcementConfig", force);
+    state.model = { kind: "announcement", ...model };
+
+    const announcement = model.value || {};
+    const link = announcement.link || {};
+    showEditor(`${editorHead("首页公告设置", "编辑访客初次打开博客时看到的 Announcement 公告")}
+      ${section("公告内容", "标题留空时，会使用博客当前语言中的默认“公告”标题。", `<div class="field-grid">
+        ${inputField("公告标题", "title", announcement.title || "", "text", { source: "announcementConfig.title" })}
+        ${inputField("公告类型", "type", announcement.type || "info", "select", { choices: ["info", "success", "warning", "error"], source: "announcementConfig.type" })}
+        ${inputField("公告图标", "icon", announcement.icon || "", "text", { source: "announcementConfig.icon" })}
+        ${inputField("允许访客关闭", "closable", announcement.closable !== false, "boolean", { source: "announcementConfig.closable" })}
+        ${inputField("公告正文", "content", announcement.content || "", "textarea", { full: true, required: true, source: "announcementConfig.content" })}
+      </div>`, "告")}
+      ${section("公告链接", "可以在公告末尾显示一个跳转按钮；博客内部页面可填写 /about/ 这类路径。", `<div class="field-grid">
+        ${inputField("显示跳转链接", "link.enable", Boolean(link.enable), "boolean", { source: "announcementConfig.link.enable" })}
+        ${inputField("链接文字", "link.text", link.text || "", "text", { source: "announcementConfig.link.text" })}
+        ${inputField("链接地址", "link.url", link.url || "", "text", { full: true, source: "announcementConfig.link.url" })}
+        ${inputField("在新窗口打开", "link.external", Boolean(link.external), "boolean", { source: "announcementConfig.link.external" })}
+      </div>`, "链")}
+      ${section("显示位置", "公告是否显示、显示在左侧栏、右侧栏或手机抽屉，由“其他管理 → 侧栏布局”中的“公告”开关控制。", `<p class="muted">这里负责公告内容；如需隐藏公告，请进入“侧栏布局”，关闭公告对应的显示位置。</p>`, "栏")}`);
+  } catch (error) { toast(error.message, true); }
+  finally { setBusy(false); }
+}
+
+async function saveAnnouncement() {
+  const model = state.model;
+  if (!model.value || typeof model.value !== "object") model.value = {};
+  if (!model.value.link || typeof model.value.link !== "object") {
+    model.value.link = { enable: false, text: "", url: "", external: false };
+  }
+
+  readForm(els.editor, model.value);
+
+  if (!String(model.value.content || "").trim()) {
+    throw new Error("请填写公告正文。");
+  }
+  if (model.value.link.enable && (!String(model.value.link.text || "").trim() || !String(model.value.link.url || "").trim())) {
+    throw new Error("启用公告链接后，请同时填写链接文字和链接地址。");
+  }
+
+  await saveModel(model, "更新首页公告内容");
+  await openAnnouncement(true);
+  toast("首页公告已保存并提交。");
 }
 
 async function openMusic(force = false) {
@@ -1003,6 +1053,7 @@ async function handleSubmit(event) {
     else if (state.model.kind === "album") await saveAlbum();
     else if (state.model.kind === "diary") await saveDiary();
     else if (state.model.kind === "site") await saveSite();
+    else if (state.model.kind === "announcement") await saveAnnouncement();
     else if (state.model.kind === "music") await saveMusic();
     else if (state.model.kind === "banner") await saveBanner();
     else if (state.model.kind === "array") await saveArraySection();
@@ -1119,11 +1170,23 @@ async function init() {
   document.documentElement.dataset.theme = theme;
   els.theme.textContent = theme === "dark" ? "☾" : "☼";
   renderModuleNav();
+
+  let session;
   try {
-    const session = await api("session");
-    state.repo = session.repo;
-    showApp(); await loadTree(true); await renderSidebar();
-  } catch { showLogin(); }
+    session = await api("session");
+  } catch {
+    showLogin();
+    return;
+  }
+
+  state.repo = session.repo;
+  showApp();
+  try {
+    await loadTree(true);
+    await renderSidebar();
+  } catch (error) {
+    toast(`已进入后台，但读取 GitHub 仓库失败：${error.message}`, true);
+  }
 }
 
 init();
