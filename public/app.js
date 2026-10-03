@@ -191,6 +191,48 @@ function stringifyPost(data, body) {
   return `---\n${keys.map(key => `${key}: ${yamlValue(data[key])}`).join("\n")}\n---\n\n${String(body || "").replace(/^\s+/, "")}`;
 }
 
+function postSourceFromForm() {
+  const model = state.model;
+  const data = readForm(els.editor, clone(model.data));
+  const body = $("#post-body", els.editor)?.value || "";
+  if (model.isAbout) return body;
+  const original = model.original || "";
+  const match = original.match(/^---[^\S\r\n]*\r?\n([\s\S]*?)\r?\n---[^\S\r\n]*(?:\r?\n|$)/);
+  if (!match) return stringifyPost(data, body);
+  const eol = original.includes("\r\n") ? "\r\n" : "\n";
+  const lines = match[1].split(/\r?\n/);
+  for (const [key, value] of Object.entries(data)) {
+    if (JSON.stringify(value) === JSON.stringify(model.data[key])) continue;
+    const index = lines.findIndex(line => line.startsWith(`${key}:`));
+    if (index < 0) {
+      if (value !== "") lines.push(`${key}: ${yamlValue(value)}`);
+      continue;
+    }
+    let end = index + 1;
+    while (end < lines.length && /^\s+\S/.test(lines[end])) end += 1;
+    lines.splice(index, end - index, ...(key === "updated" && value === "" ? [] : [`${key}: ${yamlValue(value)}`]));
+  }
+  const originalBody = original.slice(match[0].length);
+  const nextBody = body === model.body ? originalBody : `${eol}${body}`;
+  return `---${eol}${lines.join(eol)}${eol}---${eol}${nextBody}`;
+}
+
+function applyPostSource() {
+  const source = $("#post-source").value;
+  const parsed = parseFrontmatter(source);
+  state.model.data = parsed.data;
+  state.model.body = parsed.body;
+  state.model.original = source;
+  state.model.sourceDirty = false;
+  $$('[data-path]', els.editor).forEach(control => {
+    const value = getPath(parsed.data, control.dataset.path);
+    if (control.type === "checkbox") control.checked = Boolean(value);
+    else control.value = Array.isArray(value) ? value.join(", ") : value ?? "";
+  });
+  $("#post-body").value = parsed.body;
+  $("#post-preview").innerHTML = markdown(parsed.body);
+}
+
 function markdown(source) {
   const safe = escapeHtml(source || "");
   return safe
@@ -307,11 +349,12 @@ async function openPost(path, force = false) {
     const isAbout = path === "src/content/spec/about.md";
     const file = await readFile(path, force);
     const parsed = parseFrontmatter(file.content);
-    state.model = { kind: "post", path, sha: file.sha, data: parsed.data, body: parsed.body, original: file.content, isAbout };
+    state.model = { kind: "post", path, sha: file.sha, data: parsed.data, body: parsed.body, original: file.content, isAbout, sourceDirty: false };
     const data = state.model.data;
     const fields = isAbout ? "" : `<div class="field-grid">
       ${inputField("文章标题", "title", data.title, "text", { required: true })}
       ${inputField("发布日期", "published", data.published, "date", { required: true })}
+      ${inputField("更新日期（可选）", "updated", data.updated, "date")}
       ${inputField("文章分类", "category", data.category)}
       ${inputField("文章标签", "tags", data.tags || [], "list")}
       ${inputField("文章摘要", "description", data.description, "textarea", { full: true })}
@@ -324,7 +367,10 @@ async function openPost(path, force = false) {
     showEditor(`${editorHead(isAbout ? "编辑关于页面" : (data.title || "编辑文章"), path, { remove: !isAbout })}
       ${!isAbout ? section("文章信息", "无需修改 Markdown 源码即可编辑文章属性。", fields, "文") : ""}
       ${section(isAbout ? "关于页面正文" : "文章正文", "支持 Markdown；右侧预览会随输入更新。", `<div class="field-grid"><label class="field full"><span>正文内容 <small>Markdown</small></span><textarea id="post-body" class="code">${escapeHtml(parsed.body)}</textarea></label><div class="field full"><span>阅读预览</span><div id="post-preview" class="markdown-preview">${markdown(parsed.body)}</div></div></div>`, "✎")}
-      <details class="advanced"><summary>高级功能：查看和直接编辑完整 Markdown 源码</summary><div><textarea id="post-source" class="code">${escapeHtml(file.content)}</textarea><p class="muted">直接编辑这里会覆盖上面的图形化字段，请仅在了解 Frontmatter 时使用。</p><button type="button" class="secondary" data-action="apply-source">将源码载入图形化编辑器</button></div></details>`);
+      <details class="advanced"><summary>高级功能：查看和直接编辑完整 Markdown 源码</summary><div><textarea id="post-source" class="code" aria-label="完整 Markdown 源码">${escapeHtml(file.content)}</textarea><p class="muted">修改源码后，点击“保存并提交”即可保存完整源码；也可以先载入上方表单继续编辑。</p><button type="button" class="secondary" data-action="apply-source">将源码载入图形化编辑器</button></div></details>`);
+    $("details.advanced", els.editor).addEventListener("toggle", event => {
+      if (event.target.open && !state.model.sourceDirty) $("#post-source").value = postSourceFromForm();
+    });
   } catch (error) { toast(error.message, true); }
   finally { setBusy(false); }
 }
@@ -335,19 +381,28 @@ function newPost() {
   state.model = { kind: "post", path: state.selected, sha: null, data: { title: "", published: today, description: "", image: "", tags: [], category: "", draft: true }, body: "", original: "", isAbout: false, isNew: true };
   const data = state.model.data;
   showEditor(`${editorHead("新建文章", "填写标题后，后台会自动生成安全的文件名。")}
-    ${section("文章信息", "带星号的标题和日期为必填项。", `<div class="field-grid">${inputField("文章标题", "title", data.title, "text", { required: true })}${inputField("发布日期", "published", data.published, "date", { required: true })}${inputField("文章分类", "category", data.category)}${inputField("文章标签", "tags", [], "list")}${inputField("文章摘要", "description", "", "textarea", { full: true })}${inputField("封面图片路径", "image", "", "text", { full: true })}${inputField("保存为草稿", "draft", true, "boolean")}${inputField("置顶文章", "pinned", false, "boolean")}</div>`, "文")}
+    ${section("文章信息", "带星号的标题和日期为必填项。", `<div class="field-grid">${inputField("文章标题", "title", data.title, "text", { required: true })}${inputField("发布日期", "published", data.published, "date", { required: true })}${inputField("更新日期（可选）", "updated", "", "date")}${inputField("文章分类", "category", data.category)}${inputField("文章标签", "tags", [], "list")}${inputField("文章摘要", "description", "", "textarea", { full: true })}${inputField("封面图片路径", "image", "", "text", { full: true })}${inputField("保存为草稿", "draft", true, "boolean")}${inputField("置顶文章", "pinned", false, "boolean")}</div>`, "文")}
     ${section("文章正文", "输入 Markdown 正文并查看效果。", `<label class="field"><span>正文内容</span><textarea id="post-body" class="code"></textarea></label><div id="post-preview" class="markdown-preview"></div>`, "✎")}`);
 }
 
 async function savePost() {
   const model = state.model;
-  readForm(els.editor, model.data);
-  model.body = $("#post-body", els.editor)?.value || "";
-  if (!model.isAbout && !model.data.title?.trim()) throw new Error("请填写文章标题。");
+  const content = model.sourceDirty ? $("#post-source").value : postSourceFromForm();
+  const data = model.isAbout ? {} : parseFrontmatter(content).data;
+  if (!model.isAbout && !data.title?.trim()) throw new Error("请填写文章标题，并保留源码顶部的 Frontmatter。");
+  if (!model.isAbout) {
+    for (const key of ["published", "updated"]) {
+      const value = data[key];
+      if (key === "updated" && !value) continue;
+      const date = new Date(`${value}T00:00:00Z`);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(value || "") || Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== value) {
+        throw new Error(`${key === "published" ? "发布日期" : "更新日期"}请使用有效的 YYYY-MM-DD 日期。`);
+      }
+    }
+  }
   let path = model.path;
-  if (model.isNew) path = `src/content/posts/${slugify(model.data.title)}.md`;
-  const content = model.isAbout ? model.body : stringifyPost(model.data, model.body);
-  await api("file.write", { path, content, sha: model.sha, message: `${model.isNew ? "新增" : "更新"}文章：${model.data.title || "关于页面"}` });
+  if (model.isNew) path = `src/content/posts/${slugify(data.title)}.md`;
+  await api("file.write", { path, content, sha: model.sha, message: `${model.isNew ? "新增" : "更新"}文章：${data.title || "关于页面"}` });
   state.cache.clear();
   await loadTree(true);
   state.selected = path;
@@ -1099,16 +1154,7 @@ async function handleEditorClick(event) {
     } else if (action === "remove-banner") {
       await removeBanner(button.dataset.mode, button.dataset.index);
     } else if (action === "apply-source") {
-      const parsed = parseFrontmatter($("#post-source").value);
-      state.model.data = parsed.data;
-      state.model.body = parsed.body;
-      $$('[data-path]', els.editor).forEach(control => {
-        const value = getPath(state.model.data, control.dataset.path);
-        if (control.type === "checkbox") control.checked = Boolean(value);
-        else control.value = Array.isArray(value) ? value.join(", ") : value ?? "";
-      });
-      $("#post-body").value = parsed.body;
-      $("#post-preview").innerHTML = markdown(parsed.body);
+      applyPostSource();
       toast("完整源码已载入图形化编辑器，尚未保存。");
     } else if (action === "add-navbar") {
       const list = $("#navbar-items");
@@ -1147,7 +1193,23 @@ els.sideList.addEventListener("click", async event => {
 
 els.editor.addEventListener("submit", handleSubmit);
 els.editor.addEventListener("click", handleEditorClick);
-els.editor.addEventListener("input", event => { if (event.target.id === "post-body") $("#post-preview").innerHTML = markdown(event.target.value); });
+els.editor.addEventListener("input", event => {
+  if (state.model?.kind === "post") {
+    if (event.target.id === "post-source") { state.model.sourceDirty = true; return; }
+    if (event.target.id === "post-body" || event.target.dataset.path) {
+      if (state.model.sourceDirty) {
+        const value = event.target.value;
+        const checked = event.target.checked;
+        applyPostSource();
+        event.target.value = value;
+        event.target.checked = checked;
+      }
+      const source = $("#post-source");
+      if (source) source.value = postSourceFromForm();
+    }
+  }
+  if (event.target.id === "post-body") $("#post-preview").innerHTML = markdown(event.target.value);
+});
 els.newButton.addEventListener("click", () => handleNew().catch(error => toast(error.message, true)));
 els.refreshButton.addEventListener("click", refreshAll);
 els.search.addEventListener("input", () => renderSidebar().catch(error => toast(error.message, true)));
