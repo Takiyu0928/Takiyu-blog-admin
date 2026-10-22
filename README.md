@@ -1,4 +1,4 @@
-# Takiyu Blog Admin V2
+# TakiyuUI · 写作工作室
 
 这是为 `Takiyu0928/Takiyu-blog` 从零重写的图形化管理后台。它直接读写博客仓库中的配置、文章和图片，不依赖 `Takiyu-wiki-contents`，主要面向不熟悉 TypeScript、Markdown 与 Git 操作的使用者。
 
@@ -19,6 +19,30 @@
 - 支持日间、夜间模式以及手机端布局。
 
 点击“保存并提交”后，后台会通过 GitHub API 创建一次提交。连接该博客仓库的 Vercel 项目随后会自动重新部署。
+
+## 界面设计
+
+采用「风格派骨架 × 浮世绘表皮」：画卷米白底色、深靛色矩形网格，搭配普鲁士蓝、朱红与赭黄点缀，以及首页独立海景木版画。首页可继续真实草稿；文章目录与编辑器分开，返回目录保留搜索。编辑器先写标题正文，再切换预览或发布设置；日夜模式、手机菜单、离页保护和高级源码编辑均保留。本地演示按钮明确显示“保存演示”。
+
+设计规则见 [DESIGN.md](DESIGN.md)，后续维护提示词见 [docs/style-prompts.md](docs/style-prompts.md)。首页主视觉为 `public/assets/ukiyo-stijl-v4.png`，采用竖幅 2:3 构图，不叠字；登录与编辑页不复用。字体网络不可用时回退到本地无衬线字体。
+
+## 安全体验新版 UI
+
+只看设计或测试交互时，不需要配置 Token、密码或安装依赖：
+
+```powershell
+npm run preview:ui
+```
+
+打开 `http://127.0.0.1:3104/`。页面会显示「本地演示」提示，文章、相册和配置均为示例；保存、上传和删除仅修改内存，重启后重置，不连接 GitHub，也不读取 `.env`。不要在演示中保存真实文章或私人资料。
+
+登录页预览与独立端口：
+
+```powershell
+node scripts/preview.mjs --port=3105 --login
+```
+
+访问 `http://127.0.0.1:3105/`，演示密码是 `demo`，不是线上密码。两个预览进程均可用 `Ctrl+C` 停止。
 
 ## 本地运行
 
@@ -118,6 +142,8 @@ GitHub App 必须安装到 `Takiyu-blog` 仓库，并拥有 Contents 读写权�
 
 ```powershell
 npm run check
+node tests/post-editor.test.mjs
+node tests/fixtures/preview-smoke.mjs
 npm run build
 npm audit --omit=dev
 ```

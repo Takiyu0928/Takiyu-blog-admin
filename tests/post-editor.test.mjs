@@ -58,11 +58,35 @@ function editor(source = article, isAbout = false) {
     context, writes,
     field: key => formFields.find(control => control.dataset.path === key),
     source: element("#post-source"), body: element("#post-body"),
+    dialog: element("#leave-dialog"),
+    closeDialog(value) { element("#leave-dialog").returnValue = value; events["leave-dialog:close"](); },
     input(control) { events["editor:input"]({ target: control }); },
     save() { return vm.runInContext("savePost()", context); },
     apply() { return vm.runInContext("applyPostSource()", context); },
   };
 }
+
+test("clean editors can leave without opening a confirmation dialog", async () => {
+  const ui = editor();
+  assert.equal(await vm.runInContext("confirmLeave()", ui.context), true);
+});
+
+test("unsaved confirmation preserves editing on cancel and permits explicit discard", async () => {
+  const ui = editor();
+  let opened = 0;
+  ui.dialog.showModal = () => { opened += 1; };
+  ui.field("title").value = "Unsaved title";
+  ui.input(ui.field("title"));
+  const cancelled = vm.runInContext("confirmLeave()", ui.context);
+  ui.closeDialog("cancel");
+  assert.equal(await cancelled, false);
+  assert.equal(ui.field("title").value, "Unsaved title");
+  assert.equal(ui.writes.length, 0);
+  const discarded = vm.runInContext("confirmLeave()", ui.context);
+  ui.closeDialog("discard");
+  assert.equal(await discarded, true);
+  assert.equal(opened, 2);
+});
 
 test("direct source edits are submitted without applying to the form", async () => {
   const ui = editor();

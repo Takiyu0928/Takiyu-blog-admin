@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node scripts/dev.mjs",
+    "preview:ui": "node scripts/preview.mjs",
     "build": "node scripts/build.mjs",
     "check": "node --check api/admin.js && node --check public/app.js"
   },
