@@ -1,13 +1,13 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
+  <!-- CTRL-inspired light mode, with a graphite palette in dark mode. -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="color-scheme" content="light dark" />
-  <title>TakiyuUI · 写作工作室</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600&family=Archivo+Black&display=swap" rel="stylesheet" />
+  <title>Dashboard</title>
+  <link rel="icon" href="/assets/takiyu-icon.webp" type="image/webp" />
+  <link rel="preload" href="/assets/archivo-variable.ttf" as="font" type="font/ttf" crossorigin />
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
@@ -15,23 +15,29 @@
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <dialog id="leave-dialog" aria-labelledby="leave-title" aria-describedby="leave-description">
     <form method="dialog">
-      <p class="eyebrow">BEFORE YOU LEAVE</p>
+      <p class="eyebrow">未保存的更改</p>
       <h2 id="leave-title">还有未保存的更改。</h2>
       <p id="leave-description">离开后，这些更改将被放弃。要先回去保存吗？</p>
       <div class="editor-actions"><button class="primary" value="cancel" autofocus>继续编辑</button><button class="secondary" value="discard">放弃更改并离开</button></div>
     </form>
   </dialog>
   <section id="login" class="login-screen">
-    <div class="login-card">
-      <a class="wordmark" href="https://takiyu-wiki.ccwu.cc/" target="_blank" rel="noreferrer">TakiyuUI<span>写作工作室</span></a>
-      <p class="eyebrow">PERSONAL PUBLISHING / ADMIN</p>
-      <h1>欢迎回来。</h1>
-      <p class="muted">登录后管理文章、相册与站点设置。</p>
-      <form id="login-form">
-        <label>管理密码<input id="password" type="password" autocomplete="current-password" placeholder="输入你的管理密码" required /></label>
-        <button class="primary wide" type="submit">进入工作室 <span aria-hidden="true">→</span></button>
-      </form>
-      <p class="login-note">仅站点管理员可访问。</p>
+    <div class="login-layout">
+      <div class="login-card">
+        <a class="wordmark" href="https://takiyu-wiki.ccwu.cc/" target="_blank" rel="noreferrer"><img class="wordmark-icon" src="/assets/takiyu-icon.webp" width="32" height="32" alt="" /><span>TakiyuUI Dashboard</span></a>
+        <h1>欢迎回来</h1>
+        <p class="muted">登录后管理文章、相册与站点设置。</p>
+        <form id="login-form">
+          <label>管理密码<input id="password" type="password" autocomplete="current-password" placeholder="输入你的管理密码" required /></label>
+          <button class="primary wide" type="submit">进入工作室 <svg class="ui-icon motion-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></button>
+        </form>
+        <p class="login-note">仅站点管理员可访问。</p>
+      </div>
+      <div class="login-visual" aria-hidden="true">
+        <span class="login-chapter">TAKIYUUI / WRITING STUDIO</span>
+        <p>把想法<br />写成文章<span>.</span></p>
+        <span class="login-sheets"><span></span><span></span><span></span></span>
+      </div>
     </div>
   </section>
 
@@ -39,27 +45,27 @@
     <button id="nav-backdrop" class="nav-backdrop" type="button" aria-label="关闭导航" hidden></button>
     <header id="navigation" class="navigation" aria-label="工作室导航">
       <div class="navigation-brand">
-        <button id="home-button" class="wordmark" type="button">TakiyuUI<span>写作工作室</span></button>
-        <button id="navigation-toggle" class="text-button mobile-only" type="button" aria-label="打开导航" aria-controls="module-nav" aria-expanded="false">菜单 ＋</button>
-        <button id="close-navigation" class="icon-button mobile-only" type="button" aria-label="关闭导航">×</button>
+        <button id="home-button" class="wordmark" type="button" aria-label="TakiyuUI Dashboard，返回概览"><img class="wordmark-icon" src="/assets/takiyu-icon.webp" width="32" height="32" alt="" /><span>TakiyuUI Dashboard</span></button>
+        <button id="navigation-toggle" class="icon-button mobile-only" type="button" aria-label="打开导航" aria-controls="module-nav" aria-expanded="false"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+        <button id="close-navigation" class="icon-button mobile-only" type="button" aria-label="关闭导航"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6"/></svg></button>
       </div>
+      <p class="navigation-label" aria-hidden="true">工作区</p>
       <nav id="module-nav" class="module-nav" aria-label="管理模块"></nav>
       <div class="navigation-foot">
-        <span id="repo-badge" class="repo-badge">正在连接仓库…</span>
-        <button id="logout-button" class="text-button" type="button">退出登录 <span aria-hidden="true">→</span></button>
+        <button id="logout-button" class="text-button" type="button"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h5m4-11 4 4-4 4m-7-4h11"/></svg>退出登录</button>
       </div>
     </header>
     <div class="main-shell">
       <header class="topbar">
-        <div class="breadcrumb"><span>工作室</span><span aria-hidden="true">/</span><span id="current-section">概览</span></div>
+        <div class="breadcrumb"><span>Dashboard</span><span aria-hidden="true">/</span><span id="current-section">概览</span></div>
         <div class="account-actions">
-          <a class="text-button visit-site" href="https://takiyu-wiki.ccwu.cc/" target="_blank" rel="noreferrer">访问博客 <span aria-hidden="true">→</span></a>
-          <button id="refresh-button" class="text-button" type="button" title="从 GitHub 刷新内容">刷新 <span aria-hidden="true">↻</span></button>
+          <a class="text-button visit-site" href="https://takiyu-wiki.ccwu.cc/" target="_blank" rel="noreferrer" aria-label="访问博客" title="访问博客"><span class="toolbar-label">访问博客</span><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 5h6v6m0-6-8 8m5 0v4a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h4"/></svg></a>
+          <button id="refresh-button" class="icon-button" type="button" aria-label="刷新内容" title="从 GitHub 刷新内容"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 9a7.5 7.5 0 0 0-12-2l-2 2m0-5v5h5m-5 6a7.5 7.5 0 0 0 12 2l2-2m0 5v-5h-5"/></svg></button>
           <button id="theme-button" class="icon-button" type="button" aria-label="切换明暗模式" title="切换明暗模式">☼</button>
         </div>
       </header>
       <main id="main-content" tabindex="-1">
-        <div id="preview-notice" class="preview-notice hidden">本地演示 · 保存仅用于预览，不会修改你的博客。</div>
+        <div id="preview-notice" class="preview-notice hidden"><strong>本地演示</strong><span>保存仅用于预览，不会修改你的博客。</span></div>
         <div class="page-heading">
           <div><p id="page-eyebrow" class="eyebrow">PERSONAL PUBLISHING</p><h1 id="page-title">概览</h1><p id="page-description" class="muted">文章、草稿与最近更新。</p></div>
           <button id="new-button" class="primary" type="button">＋ <span>新增条目</span></button>
@@ -82,12 +88,13 @@
             <form id="editor" class="editor hidden"></form>
           </section>
         </div>
-        <footer class="workspace-footer"><span>TakiyuUI / Personal publishing</span><span id="connection-state">正在连接</span></footer>
+        <footer class="workspace-footer"><span id="repo-badge" class="repo-badge">正在连接仓库…</span><span id="connection-state">正在连接</span></footer>
       </main>
     </div>
   </div>
 
   <input id="file-picker" type="file" accept="image/*,audio/*" hidden />
   <script type="module" src="/app.js"></script>
+  <script type="module" src="/ctrl-motion.js"></script>
 </body>
 </html>

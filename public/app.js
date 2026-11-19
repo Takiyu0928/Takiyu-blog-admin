@@ -2,25 +2,49 @@ const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
 const modules = [
-  { id: "home", label: "概览", title: "写作工作室", eyebrow: "PERSONAL PUBLISHING", description: "文章、草稿与最近更新。" },
-  { id: "posts", label: "文章", title: "文章", eyebrow: "01 / WRITING", description: "查找文章，继续编辑或新建草稿。", catalog: "文章目录" },
-  { id: "albums", label: "相册", title: "相册", eyebrow: "02 / PHOTOGRAPHS", description: "管理相册信息与上传的照片。", catalog: "相册目录" },
-  { id: "diary", label: "日记", title: "日记", eyebrow: "03 / JOURNAL", description: "管理日记正文、日期与图片。", catalog: "日记目录" },
-  { id: "other", label: "站点", title: "站点设置", eyebrow: "04 / SITE SETTINGS", description: "网站信息、导航与各类展示内容。", catalog: "设置分类" },
+  { id: "home", icon: "grid", label: "概览", title: "TakiyuUI Dashboard", eyebrow: "WORKSPACE", description: "文章、草稿与最近更新。" },
+  { id: "posts", icon: "file", label: "文章", title: "文章", eyebrow: "WRITING", description: "查找文章，继续编辑或新建草稿。", catalog: "文章目录" },
+  { id: "albums", icon: "image", label: "相册", title: "相册", eyebrow: "ALBUMS", description: "管理相册信息与上传的照片。", catalog: "相册目录" },
+  { id: "diary", icon: "book", label: "日记", title: "日记", eyebrow: "JOURNAL", description: "管理日记正文、日期与图片。", catalog: "日记目录" },
+  { id: "other", icon: "settings", label: "站点", title: "站点设置", eyebrow: "SITE SETTINGS", description: "网站信息、导航与各类展示内容。", catalog: "设置分类" },
 ];
 
+const icons = {
+  grid: '<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
+  file: '<path d="M14 4H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9Zm0 0v5h5M9 13h6m-6 3h6"/>',
+  image: '<rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1.5"/><path d="m5 17 4-4 3 3 3.5-4L20 17"/>',
+  book: '<rect x="5" y="4" width="14" height="16" rx="2"/><path d="M9 4v16m3-11h4m-4 4h4"/>',
+  settings: '<path d="M4 7h5m4 0h7M4 17h8m4 0h4"/><circle cx="11" cy="7" r="2"/><circle cx="14" cy="17" r="2"/>',
+  edit: '<path d="m15.5 5.5 3 3M5 19l4.5-1 9.8-9.8a2.1 2.1 0 0 0-3-3L6.5 15Z"/>',
+  globe: '<circle cx="12" cy="12" r="8"/><ellipse cx="12" cy="12" rx="3.5" ry="8"/><path d="M4 12h16"/>',
+  bell: '<path d="M9.5 19a2.5 2.5 0 0 0 5 0M5 16h14l-1.7-2V9a5.3 5.3 0 0 0-10.6 0v5z"/>',
+  music: '<path d="M10 17V6l9-2v11M10 9l9-2"/><ellipse cx="7.5" cy="17.5" rx="2.5" ry="2"/><ellipse cx="16.5" cy="15.5" rx="2.5" ry="2"/>',
+  arrow: '<path d="M5 12h14m-5-5 5 5-5 5"/>',
+  close: '<path d="m6 6 12 12m0-12L6 18"/>',
+  sun: '<circle cx="12" cy="12" r="3.5"/><path d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.4-6.4L17 7m-10 10-1.4 1.4m12.8 0L17 17M7 7 5.6 5.6"/>',
+  moon: '<path d="M20 15a8 8 0 0 1-11-11 8.1 8.1 0 1 0 11 11Z"/>',
+};
+
+function icon(name) {
+  return `<svg class="ui-icon${name === "arrow" ? " motion-arrow" : ""}" viewBox="0 0 24 24" aria-hidden="true">${icons[name]}</svg>`;
+}
+
+function removeRowButton() {
+  return `<button type="button" class="remove-row" aria-label="移除此条目" title="移除此条目" data-action="remove-row">${icon("close")}</button>`;
+}
+
 const otherSections = [
-  { id: "site", label: "网站信息", icon: "♙", count: 2, note: "修改站点标题、网址、功能页面、站长头像、名称、介绍和社交链接。" },
-  { id: "announcement", label: "首页公告", icon: "!", count: 1, note: "编辑初次打开博客时显示的公告标题、正文、样式和跳转链接。" },
-  { id: "music", label: "网站音乐", icon: "≋", count: 2, note: "配置网易云歌单、播放器显示方式和本地歌曲列表。" },
-  { id: "friends", label: "友链", icon: "♣", count: "array", path: "src/data/friends.ts", variable: "friendsData" },
-  { id: "projects", label: "项目展示", icon: "▣", count: "array", path: "src/data/projects.ts", variable: "projectsData" },
-  { id: "skills", label: "技能展示", icon: "♙", count: "array", path: "src/data/skills.ts", variable: "skillsData" },
-  { id: "timeline", label: "时间线", icon: "⌁", count: "array", path: "src/data/timeline.ts", variable: "timelineData" },
-  { id: "devices", label: "设备展示", icon: "▥", count: "object", path: "src/data/devices.ts", variable: "devicesData" },
-  { id: "banner", label: "首页图", icon: "▧", count: 2, note: "上传桌面端和移动端横幅，并调整轮播、水波、位置和首页标题。" },
-  { id: "navbar", label: "顶栏与菜单", icon: "☷", count: "array", path: "src/config/navBarConfig.ts", variable: "navBarConfig" },
-  { id: "sidebar", label: "侧栏布局", icon: "▤", count: 3, path: "src/config/sidebarConfig.ts", variable: "sidebarLayoutConfig" },
+  { id: "site", label: "网站信息", count: 2, note: "修改站点标题、网址、功能页面、站长头像、名称、介绍和社交链接。" },
+  { id: "announcement", label: "首页公告", count: 1, note: "编辑初次打开博客时显示的公告标题、正文、样式和跳转链接。" },
+  { id: "music", label: "网站音乐", count: 2, note: "配置网易云歌单、播放器显示方式和本地歌曲列表。" },
+  { id: "friends", label: "友链", count: "array", path: "src/data/friends.ts", variable: "friendsData" },
+  { id: "projects", label: "项目展示", count: "array", path: "src/data/projects.ts", variable: "projectsData" },
+  { id: "skills", label: "技能展示", count: "array", path: "src/data/skills.ts", variable: "skillsData" },
+  { id: "timeline", label: "时间线", count: "array", path: "src/data/timeline.ts", variable: "timelineData" },
+  { id: "devices", label: "设备展示", count: "object", path: "src/data/devices.ts", variable: "devicesData" },
+  { id: "banner", label: "首页图", count: 2, note: "上传桌面端和移动端横幅，并调整轮播、水波、位置和首页标题。" },
+  { id: "navbar", label: "顶栏与菜单", count: "array", path: "src/config/navBarConfig.ts", variable: "navBarConfig" },
+  { id: "sidebar", label: "侧栏布局", count: 3, path: "src/config/sidebarConfig.ts", variable: "sidebarLayoutConfig" },
 ];
 
 const arraySchemas = {
@@ -145,8 +169,8 @@ async function api(action, payload = {}) {
 function showLogin() { setNavigation(false); els.login.classList.remove("hidden"); els.app.classList.add("hidden"); }
 function showApp() { els.login.classList.add("hidden"); els.app.classList.remove("hidden"); }
 
-function section(title, subtitle, content, icon = "✦") {
-  return `<section class="section-card"><div class="section-title"><span class="section-icon">${icon}</span><div><h3>${escapeHtml(title)}</h3><p>${escapeHtml(subtitle)}</p></div></div>${content}</section>`;
+function section(title, subtitle, content) {
+  return `<section class="section-card"><div class="section-title"><h3>${escapeHtml(title)}</h3><p>${escapeHtml(subtitle)}</p></div>${content}</section>`;
 }
 
 function inputField(label, path, value, type = "text", options = {}) {
@@ -163,7 +187,7 @@ function inputField(label, path, value, type = "text", options = {}) {
 }
 
 function editorHead(title, subtitle, { save = true, remove = false, extra = "" } = {}) {
-  return `<div class="editor-head"><div><button type="button" class="text-button back-to-catalog" data-action="back-catalog">← 返回目录</button><h2>${escapeHtml(title)}</h2><small class="muted editor-path">${escapeHtml(subtitle || "")}</small><small data-edit-status aria-live="polite">更改后请保存</small></div><div class="editor-actions">${extra}${remove ? '<button type="button" class="danger" data-action="delete">删除</button>' : ""}${save ? `<button type="submit" class="primary">${state.demo ? "保存演示" : "保存并提交"} <span aria-hidden="true">→</span></button>` : ""}</div></div>`;
+  return `<div class="editor-head"><div><button type="button" class="text-button back-to-catalog" data-action="back-catalog">← 返回目录</button><h2>${escapeHtml(title)}</h2><small class="muted editor-path">${escapeHtml(subtitle || "")}</small><small data-edit-status aria-live="polite">更改后请保存</small></div><div class="editor-actions">${extra}${remove ? '<button type="button" class="danger" data-action="delete">删除</button>' : ""}${save ? `<button type="submit" class="primary">${state.demo ? "保存演示" : "保存并提交"} ${icon("arrow")}</button>` : ""}</div></div>`;
 }
 
 function showEditor(html) {
@@ -224,7 +248,7 @@ function setNavigation(open) {
 
 function setTheme(theme) {
   document.documentElement.dataset.theme = theme;
-  els.theme.textContent = theme === "dark" ? "☼" : "☾";
+  els.theme.innerHTML = icon(theme === "dark" ? "sun" : "moon");
   els.theme.setAttribute("aria-label", theme === "dark" ? "切换到日间模式" : "切换到夜间模式");
   els.theme.title = theme === "dark" ? "切换到日间模式" : "切换到夜间模式";
 }
@@ -321,7 +345,15 @@ function markdown(source) {
 }
 
 function renderModuleNav() {
-  els.moduleNav.innerHTML = modules.map(item => `<button type="button" data-module="${item.id}" class="${state.module === item.id ? "active" : ""}"${state.module === item.id ? ' aria-current="page"' : ""}>${item.label}</button>`).join("");
+  if (!els.moduleNav.firstElementChild) {
+    els.moduleNav.innerHTML = modules.map(item => `<button type="button" data-module="${item.id}">${icon(item.icon)}<span>${item.label}</span></button>`).join("");
+  }
+  $$("button[data-module]", els.moduleNav).forEach(button => {
+    const active = button.dataset.module === state.module;
+    button.classList.toggle("active", active);
+    if (active) button.setAttribute("aria-current", "page");
+    else button.removeAttribute("aria-current");
+  });
   const current = modules.find(item => item.id === state.module);
   els.pageTitle.textContent = current.title;
   els.pageEyebrow.textContent = current.eyebrow;
@@ -416,7 +448,7 @@ async function renderSidebar() {
 function sideItem({ id, title, subtitle = "", count = "" }) {
   return `<button type="button" class="side-item${String(state.selected) === String(id) ? " active" : ""}" data-id="${escapeHtml(id)}">
     <span class="side-title">${escapeHtml(title)}<small class="side-subtitle">${escapeHtml(subtitle)}</small></span>
-    <span class="side-count">${escapeHtml(count)}</span><span class="edit-arrow" aria-hidden="true">→</span>
+    <span class="side-count">${escapeHtml(count)}</span><span class="edit-arrow">${icon("arrow")}</span>
   </button>`;
 }
 
@@ -435,6 +467,29 @@ async function postEntries() {
   }));
 }
 
+function dashboardTitle() {
+  return `<span class="title-lockup" aria-hidden="true">
+    <span class="type-word" data-type-line><span>TakiyuUI</span></span>
+    <span class="studio-emblem"><img src="/assets/takiyu-icon.webp" width="96" height="96" alt="" draggable="false" /></span>
+    <span class="type-word" data-type-line><span>Dashboard</span></span>
+  </span>`;
+}
+
+function stickerField() {
+  const pieces = [1, 2, 3, 4, 5, 1, 2, 3, 4, 5];
+  // Exact static SVGs from ctrl.xyz/images/stickers/, for the local comparison.
+  return `<div class="sticker-layer" aria-hidden="true">
+    ${pieces.map(piece => `<span class="trail-sticker" data-trail-sticker><img src="/assets/ctrl-stickers/sticker-${piece}_clean.svg" alt="" draggable="false" /></span>`).join("")}
+  </div>`;
+}
+
+// The side tiles support the chapter; the center retains the real controls.
+function reelTile(side, tone, title, detail, label, symbol) {
+  return `<div class="reel-aside reel-aside--${side}" data-reel-side="${side}" data-tone="${tone}" aria-hidden="true">
+    <div><p class="reel-aside-title">${escapeHtml(title)}</p><p class="reel-aside-note">${escapeHtml(detail)}</p></div>
+    <div class="reel-aside-foot"><span>${escapeHtml(label)}</span>${icon(symbol)}</div>
+  </div>`;
+}
 async function renderDashboard() {
   els.newButton.classList.add("hidden");
   const entries = await postEntries();
@@ -442,11 +497,100 @@ async function renderDashboard() {
   const recent = [...entries].sort((a, b) => b.date.localeCompare(a.date));
   const drafts = recent.filter(item => item.draft);
   const draft = drafts[0];
-  els.dashboard.innerHTML = `<section class="overview-intro"><div class="overview-copy"><p class="eyebrow">${draft ? "DRAFT / CONTINUE WRITING" : "NEW / START WRITING"}</p><h2>${draft ? "继续写完这篇草稿。" : "新建一篇文章。"}</h2><p class="muted">${draft ? escapeHtml(draft.title) : "填写标题和正文，随时保存为草稿。"}</p>${draft ? `<p class="draft-date">最近编辑日期 · ${escapeHtml(draft.date || "未设置日期")}</p><button type="button" class="primary" data-open-post="${escapeHtml(draft.path)}">继续编辑 <span aria-hidden="true">→</span></button><button type="button" class="text-button" data-new-post>新建文章 ＋</button>` : '<button type="button" class="primary" data-new-post>新建文章 <span aria-hidden="true">→</span></button>'}</div><figure class="studio-print"><img src="/assets/ukiyo-stijl-v4.png" width="1024" height="1536" alt="米白纸面上以普鲁士蓝、朱红与赭黄套色的竖幅浮世绘海岸木版画" /></figure></section>
-    <dl class="overview-strip"><div><dt>文章</dt><dd>${entries.length.toString().padStart(2, "0")}</dd></div><div><dt>草稿</dt><dd>${unreadable ? "—" : drafts.length.toString().padStart(2, "0")}</dd></div><div><dt>相册</dt><dd>${albumIds().length.toString().padStart(2, "0")}</dd></div></dl>
-    <section class="dashboard-section"><div class="section-heading"><h2>最近文章</h2><button class="text-button" type="button" data-module="posts">全部文章 →</button></div><div class="list-columns" aria-hidden="true"><span>标题</span><span>类型 / 状态</span><span>更新日期</span><span></span></div>
-    ${recent.length ? recent.slice(0, 5).map(item => `<button type="button" class="recent-post" data-open-post="${escapeHtml(item.path)}"><span>${escapeHtml(item.title)}</span><span class="post-status">文章 / ${item.unreadable ? "读取失败" : item.draft ? "草稿" : "已发布"}</span><time>${escapeHtml(item.date || "未设置日期")}</time><span class="edit-arrow" aria-hidden="true">→</span></button>`).join("") : '<p class="dashboard-empty">暂无文章。点击“新建文章”开始。</p>'}</section>
-    <section class="dashboard-section quick-links"><span class="eyebrow">站点管理</span><button type="button" class="text-button" data-section="site">网站与资料 →</button><button type="button" class="text-button" data-section="banner">首页横幅 →</button><button type="button" class="text-button" data-section="announcement">公告 →</button><button type="button" class="text-button" data-section="music">音乐 →</button></section>`;
+  const writeRoute = draft ? `data-open-post="${escapeHtml(draft.path)}"` : "data-new-post";
+  const writeLabel = draft ? "继续编辑" : "新建文章";
+  const beads = '<span class="ctrl-beads" aria-hidden="true"><i></i><i></i><i></i></span>';
+  const metrics = [
+    ["ARTICLES", "文章", entries.length, "查找与编辑文章", "file", 'data-module="posts"'],
+    ["DRAFTS", "草稿", unreadable ? "—" : drafts.length, draft ? "打开最近的草稿" : "在文章目录管理草稿", "edit", draft ? writeRoute : 'data-module="posts"'],
+    ["ALBUMS", "相册", albumIds().length, "整理照片和相册", "image", 'data-module="albums"'],
+  ];
+  const shortcuts = [
+    ["site", "globe", "网站与资料", "站点标题、头像与社交链接"],
+    ["banner", "image", "首页横幅", "管理桌面与手机首页图"],
+    ["announcement", "bell", "公告", "编辑首页公告及跳转"],
+    ["music", "music", "音乐", "管理音乐播放器与歌单"],
+  ];
+  els.dashboard.innerHTML = `
+    <section class="overview-intro">
+      <div class="overview-copy">
+        <div class="hero-scroll-copy">
+        <p class="hero-tag" data-stage="hint">博客内容管理</p>
+        <h1 class="hero-display type-display" data-typewriter aria-label="TakiyuUI Dashboard">${dashboardTitle()}</h1>
+        <p class="hero-note" data-stage="detail">${draft ? `<span class="draft-tag">最近草稿</span><span>${escapeHtml(draft.title)}</span>` : "写下新的想法，随时保存为草稿。"}</p>
+        </div>
+        <div class="overview-actions">
+          <div class="write-slot" data-write-slot><button type="button" class="primary hero-cta write-cta" data-inline-write ${writeRoute} aria-label="${writeLabel}"><span class="cta-content">${beads}<span class="write-label" aria-hidden="true">${writeLabel}</span></span></button></div>
+          ${draft ? '<button type="button" class="text-button hero-new" data-new-post>新建文章</button>' : ""}
+        </div>
+        <a class="hero-cue" href="#content-deck" aria-label="向下查看内容概览"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v15m-5-5 5 5 5-5"/></svg></a>
+      </div>
+    </section>
+    <div class="overview-reel" data-reel id="content-deck" tabindex="-1">
+      <div class="reel-sticky" data-reel-sticky>
+        <div class="reel-splash" aria-hidden="true"><img src="/assets/takiyu-icon.webp" alt="" width="72" height="72" draggable="false" /></div>
+        <section class="scroll-stage content-deck" data-scroll-stage aria-labelledby="deck-title">
+          ${reelTile("lead", "blue", "从草稿到发布", "文章、草稿与相册", "工作台", "grid")}
+          <div class="stage-inner">
+            <div class="deck-heading">
+              <div><p class="deck-kicker">WORKSPACE</p><h2 id="deck-title">内容概览</h2><p class="deck-note">从这里管理文章、草稿和相册。</p></div>
+            </div>
+            <div class="signal-grid">${metrics.map(([label, title, total, note, symbol, route]) => `
+              <div class="signal-frame">
+                <button type="button" class="signal-card signal-card--${symbol}" data-tilt ${route}>
+                  <span class="signal-meta" aria-hidden="true">${label}</span><span class="signal-arrow">${icon("arrow")}</span>
+                  <span class="signal-count">${total}</span><span class="signal-title">${title}</span><span class="signal-note">${note}</span>
+                  <span class="signal-art" aria-hidden="true"><span></span><span>${icon(symbol)}</span></span>
+                </button>
+              </div>`).join("")}</div>
+          </div>
+          ${reelTile("echo", "neutral", draft ? "接着写下去" : "开始新的写作", draft?.title ?? "在文章目录新建草稿。", "草稿", "edit")}
+        </section>
+        <section class="scroll-stage recent-section" data-scroll-stage aria-labelledby="recent-title">
+          ${reelTile("lead", "yellow", "找回上次的进度", "最近编辑的文章优先显示。", "最近更新", "file")}
+          <div class="stage-inner">
+            <div class="deck-heading">
+              <div><p class="deck-kicker">WRITING</p><h2 id="recent-title">最近文章</h2><p class="deck-note">按最近更新排序，选一篇继续写。</p></div>
+              <button class="secondary deck-all" type="button" data-module="posts">全部文章</button>
+            </div>
+            <div class="dashboard-section recent-list">
+              ${recent.length ? `<div class="list-columns" aria-hidden="true"><span>标题</span><span>状态</span><span>最近更新</span></div>
+              ${recent.slice(0, 5).map(item => `
+                <button type="button" class="recent-post" data-open-post="${escapeHtml(item.path)}">
+                  <span class="recent-title">${icon("file")}<span>${escapeHtml(item.title)}</span></span>
+                  <span class="post-status" data-status="${item.unreadable ? "error" : item.draft ? "draft" : "published"}">${item.unreadable ? "读取失败" : item.draft ? "草稿" : "已发布"}</span>
+                  <span class="post-date">${escapeHtml(item.date || "未设置日期")}</span><span class="edit-arrow">${icon("arrow")}</span>
+                </button>`).join("")}` : '<p class="dashboard-empty">暂无文章。点击“新建文章”开始。</p>'}
+            </div>
+          </div>
+          ${reelTile("echo", "neutral", "继续写作", recent.length ? `这里展示最近更新的 ${Math.min(recent.length, 5)} 篇。` : "还没有文章记录。", "文章库", "edit")}
+        </section>
+        <section class="scroll-stage quick-links" data-scroll-stage aria-labelledby="shortcuts-title">
+          ${reelTile("lead", "pink", "换个博客外观", "从网站资料到首页横幅。", "外观", "globe")}
+          <div class="stage-inner">
+            <div class="deck-heading">
+              <div><p class="deck-kicker">SITE SETTINGS</p><h2 id="shortcuts-title">快捷设置</h2><p class="deck-note">更换博客外观，更新公告和歌单。</p></div>
+            </div>
+            <div class="shortcut-list">${shortcuts.map(([id, symbol, label, description]) => `
+              <button type="button" class="shortcut" data-section="${id}">
+                <span class="shortcut-icon">${icon(symbol)}</span><span><strong>${label}</strong><small>${description}</small></span><span class="edit-arrow">${icon("arrow")}</span>
+              </button>`).join("")}</div>
+          </div>
+          ${reelTile("echo", "neutral", "更新首页组件", "这里可管理公告、横幅和音乐。", "站点设置", "settings")}
+        </section>
+        <nav class="reel-steps" aria-label="概览章节">
+          <button type="button" data-reel-to="0">内容概览</button><button type="button" data-reel-to="1">最近文章</button><button type="button" data-reel-to="2">快捷设置</button>
+        </nav>
+      </div>
+    </div>
+    <div class="overview-finale sticker-stage" data-sticker-stage>
+      ${stickerField()}
+      <div class="finale-copy">
+        <p class="finale-note">把没写完的故事，写下去。</p>
+        <p class="type-display finale-title" data-typewriter><span class="sr-only">Write on, TakiyuUI</span><span class="title-lockup" aria-hidden="true"><span class="type-word" data-type-line><span>Write on</span></span><span class="type-word" data-type-line><span>TakiyuUI</span></span></span></p>
+        <button type="button" class="primary hero-cta finale-cta" ${writeRoute}>${beads}${writeLabel}</button>
+      </div>
+    </div>`;
 }
 
 async function renderPostSidebar() {
@@ -592,7 +736,7 @@ function albumForm(info) {
 function albumImageGrid(id) {
   const images = albumImages(id);
   if (!images.length) return '<p class="muted">尚未上传图片。</p>';
-  return `<div class="image-grid">${images.map(file => `<figure class="image-card"><img src="${escapeHtml(imageUrl(file.path))}" alt="${escapeHtml(fileName(file.path))}" loading="lazy"><figcaption class="image-path">${escapeHtml(file.path)}</figcaption><button type="button" class="remove-row" aria-label="删除这张图片" data-action="delete-image" data-path="${escapeHtml(file.path)}" data-sha="${escapeHtml(file.sha)}">⌫</button></figure>`).join("")}</div>`;
+  return `<div class="image-grid">${images.map(file => `<figure class="image-card"><img src="${escapeHtml(imageUrl(file.path))}" alt="${escapeHtml(fileName(file.path))}" loading="lazy"><figcaption class="image-path">${escapeHtml(file.path)}</figcaption><button type="button" class="remove-row" aria-label="删除这张图片" title="删除这张图片" data-action="delete-image" data-path="${escapeHtml(file.path)}" data-sha="${escapeHtml(file.sha)}">${icon("close")}</button></figure>`).join("")}</div>`;
 }
 
 async function openAlbum(id, force = false) {
@@ -603,8 +747,8 @@ async function openAlbum(id, force = false) {
     const info = JSON.parse(file.content);
     state.model = { kind: "album", id, path, sha: file.sha, value: info, original: file.content };
     showEditor(`${editorHead(info.title || id, path, { remove: true })}
-      ${section("相册信息", "相册 ID 是目录名称，已创建的相册不建议随意修改 ID。", `<label class="field"><span>相册 ID <small>public/images/albums/&lt;id&gt;</small></span><input value="${escapeHtml(id)}" disabled></label>${albumForm(info)}`, "▧")}
-      ${section("相册图片", "从电脑选择图片后会直接上传到当前相册目录。单张图片建议小于 4 MB。", `<div class="image-manager"><div class="image-group-head"><strong>${albumImages(id).length} 张图片</strong><button type="button" class="upload-button" data-action="upload-album">⇧ 上传图片</button></div>${albumImageGrid(id)}</div>`, "图")}
+      ${section("相册信息", "相册 ID 是目录名称，已创建的相册不建议随意修改 ID。", `<label class="field"><span>相册 ID <small>public/images/albums/&lt;id&gt;</small></span><input value="${escapeHtml(id)}" disabled></label>${albumForm(info)}`)}
+      ${section("相册图片", "从电脑选择图片后会直接上传到当前相册目录。单张图片建议小于 4 MB。", `<div class="image-manager"><div class="image-group-head"><strong>${albumImages(id).length} 张图片</strong><button type="button" class="upload-button" data-action="upload-album">⇧ 上传图片</button></div>${albumImageGrid(id)}</div>`)}
       <details class="advanced"><summary>高级功能：相册 info.json</summary><div><textarea id="album-source" class="code">${escapeHtml(file.content)}</textarea><p class="muted">一般不需要修改这里。错误的 JSON 会导致相册页面构建失败。</p></div></details>`);
   } catch (error) { toast(error.message, true); }
   finally { setBusy(false); }
@@ -615,7 +759,7 @@ function newAlbum() {
   state.selected = `new-album-${Date.now()}`;
   state.model = { kind: "album", id: "", path: "", sha: null, value: { title: "", date: today, description: "", location: "", tags: [], hidden: false, layout: "grid", columns: 3 }, isNew: true };
   showEditor(`${editorHead("新建相册", "先填写相册 ID 和基本信息，保存后再上传图片。")}
-    ${section("相册信息", "相册 ID 只使用英文、数字和短横线，例如：summer-trip。", `<div class="field-grid">${inputField("相册 ID", "$albumId", "", "text", { required: true, source: "目录名称" })}${albumForm(state.model.value)}</div>`, "▧")}`);
+    ${section("相册信息", "相册 ID 只使用英文、数字和短横线，例如：summer-trip。", `<div class="field-grid">${inputField("相册 ID", "$albumId", "", "text", { required: true, source: "目录名称" })}${albumForm(state.model.value)}</div>`)}`);
 }
 
 async function saveAlbum() {
@@ -717,7 +861,7 @@ async function openDiary(index, force = false) {
     const item = clone(model.value[Number(index)]);
     if (!item) throw new Error("找不到这条日记，请刷新后重试。");
     state.model = { kind: "diary", ...model, index: Number(index), item };
-    showEditor(`${editorHead("编辑日记", `日记 ID：${item.id}`, { remove: true })}${section("日记内容", "修改后会写回日记数据文件。", diaryFields(item), "记")}<details class="advanced"><summary>高级功能：当前日记 JSON</summary><div><textarea id="diary-source" class="code">${escapeHtml(JSON.stringify(item, null, 2))}</textarea></div></details>`);
+    showEditor(`${editorHead("编辑日记", `日记 ID：${item.id}`, { remove: true })}${section("日记内容", "修改后会写回日记数据文件。", diaryFields(item))}<details class="advanced"><summary>高级功能：当前日记 JSON</summary><div><textarea id="diary-source" class="code">${escapeHtml(JSON.stringify(item, null, 2))}</textarea></div></details>`);
   } catch (error) { toast(error.message, true); }
   finally { setBusy(false); }
 }
@@ -728,7 +872,7 @@ async function newDiary() {
   const item = { id: Math.max(0, ...ids) + 1, content: "", date: new Date().toISOString(), images: [], location: "", mood: "", tags: [] };
   state.model = { kind: "diary", ...model, index: -1, item, isNew: true };
   state.selected = "new";
-  showEditor(`${editorHead("新建日记", `自动分配 ID：${item.id}`)}${section("日记内容", "填写文字后保存即可发布。", diaryFields(item), "记")}`);
+  showEditor(`${editorHead("新建日记", `自动分配 ID：${item.id}`)}${section("日记内容", "填写文字后保存即可发布。", diaryFields(item))}`);
 }
 
 async function saveDiary() {
@@ -764,7 +908,7 @@ async function renderOtherSidebar() {
         count = Array.isArray(model.value) ? model.value.length : Object.keys(model.value || {}).length;
       } catch { count = "!"; }
     }
-    return { id: item.id, icon: item.icon, title: item.label, subtitle: item.note || "图形化编辑博客对应页面", count };
+    return { id: item.id, title: item.label, subtitle: item.note || "图形化编辑博客对应页面", count };
   }));
   const visible = currentSearch(entries);
   els.sidebarNote.textContent = "选择分类后编辑；各分类的高级源码功能保持可用。";
@@ -786,7 +930,7 @@ async function openOther(id, force = false) {
 }
 
 function socialLinksEditor(links = []) {
-  return `<div id="social-links" class="array-list">${links.map((item, index) => `<div class="array-row" data-index="${index}"><div class="array-fields"><label>显示名称<input data-key="name" value="${escapeHtml(item.name || "")}"></label><label>链接地址<input data-key="url" value="${escapeHtml(item.url || "")}"></label><label class="wide">图标名称<input data-key="icon" value="${escapeHtml(item.icon || "")}" placeholder="例如 fa7-brands:github"></label></div><button type="button" class="remove-row" aria-label="移除此条目" data-action="remove-row">⌫</button></div>`).join("")}</div><button type="button" class="add-row" data-action="add-social">＋ 添加社交链接</button>`;
+  return `<div id="social-links" class="array-list">${links.map((item, index) => `<div class="array-row" data-index="${index}"><div class="array-fields"><label>显示名称<input data-key="name" value="${escapeHtml(item.name || "")}"></label><label>链接地址<input data-key="url" value="${escapeHtml(item.url || "")}"></label><label class="wide">图标名称<input data-key="icon" value="${escapeHtml(item.icon || "")}" placeholder="例如 fa7-brands:github"></label></div>${removeRowButton()}</div>`).join("")}</div><button type="button" class="add-row" data-action="add-social">＋ 添加社交链接</button>`;
 }
 
 async function openSite(force = false) {
@@ -809,16 +953,16 @@ async function openSite(force = false) {
         ${inputField("顶栏图标", "site.navbarTitle.icon", getPath(s, "navbarTitle.icon"), "text", { source: "navbarTitle.icon" })}
         ${inputField("Bilibili UID", "site.bilibili.vmid", getPath(s, "bilibili.vmid"), "text", { source: "bilibili.vmid" })}
         ${inputField("Bangumi 用户 ID", "site.bangumi.userId", getPath(s, "bangumi.userId"), "text", { source: "bangumi.userId" })}
-      </div>`, "站")}
+      </div>`)}
       ${section("站长资料", "头像可直接从电脑上传；名称、简介与打字机效果会显示在侧栏个人卡片。", `<div class="preview-card"><div><img id="avatar-preview" src="${escapeHtml(avatar)}" alt="站长头像"><div class="editor-actions" style="margin-top:12px"><button type="button" class="upload-button" data-action="upload-avatar">⇧ 上传头像</button></div></div><div class="field-grid">
         ${inputField("头像路径", "profile.avatar", p.avatar, "text", { full: true, source: "profileConfig.avatar" })}
         ${inputField("站长名称", "profile.name", p.name, "text", { required: true, source: "profileConfig.name" })}
         ${inputField("启用介绍打字机", "profile.typewriter.enable", getPath(p, "typewriter.enable", true), "boolean")}
         ${inputField("打字速度", "profile.typewriter.speed", getPath(p, "typewriter.speed", 80), "number", { min: 10 })}
         ${inputField("站长介绍", "profile.bio", p.bio, "textarea", { full: true, source: "profileConfig.bio" })}
-      </div></div>`, "人")}
-      ${section("社交链接", "不需要某个平台时直接删除对应条目；添加链接只需填写名称、网址和图标。", socialLinksEditor(p.links || []), "链")}
-      ${section("特色页面开关", "关闭后页面会被禁用；对应顶栏链接也会自动隐藏。", `<div class="field-grid">${Object.entries(s.featurePages || {}).map(([key, value]) => inputField({ anime: "番剧", diary: "日记", friends: "友链", projects: "项目", skills: "技能", timeline: "时间线", albums: "相册", devices: "设备", aiTools: "AI 工具" }[key] || key, `site.featurePages.${key}`, value, "boolean", { source: `featurePages.${key}` })).join("")}</div>`, "开")}`);
+      </div></div>`)}
+      ${section("社交链接", "不需要某个平台时直接删除对应条目；添加链接只需填写名称、网址和图标。", socialLinksEditor(p.links || []))}
+      ${section("特色页面开关", "关闭后页面会被禁用；对应顶栏链接也会自动隐藏。", `<div class="field-grid">${Object.entries(s.featurePages || {}).map(([key, value]) => inputField({ anime: "番剧", diary: "日记", friends: "友链", projects: "项目", skills: "技能", timeline: "时间线", albums: "相册", devices: "设备", aiTools: "AI 工具" }[key] || key, `site.featurePages.${key}`, value, "boolean", { source: `featurePages.${key}` })).join("")}</div>`)}`);
   } catch (error) { toast(error.message, true); }
   finally { setBusy(false); }
 }
@@ -855,14 +999,14 @@ async function openAnnouncement(force = false) {
         ${inputField("公告图标", "icon", announcement.icon || "", "text", { source: "announcementConfig.icon" })}
         ${inputField("允许访客关闭", "closable", announcement.closable !== false, "boolean", { source: "announcementConfig.closable" })}
         ${inputField("公告正文", "content", announcement.content || "", "textarea", { full: true, required: true, source: "announcementConfig.content" })}
-      </div>`, "告")}
+      </div>`)}
       ${section("公告链接", "可以在公告末尾显示一个跳转按钮；博客内部页面可填写 /about/ 这类路径。", `<div class="field-grid">
         ${inputField("显示跳转链接", "link.enable", Boolean(link.enable), "boolean", { source: "announcementConfig.link.enable" })}
         ${inputField("链接文字", "link.text", link.text || "", "text", { source: "announcementConfig.link.text" })}
         ${inputField("链接地址", "link.url", link.url || "", "text", { full: true, source: "announcementConfig.link.url" })}
         ${inputField("在新窗口打开", "link.external", Boolean(link.external), "boolean", { source: "announcementConfig.link.external" })}
-      </div>`, "链")}
-      ${section("显示位置", "公告是否显示、显示在左侧栏、右侧栏或手机抽屉，由“其他管理 → 侧栏布局”中的“公告”开关控制。", `<p class="muted">这里负责公告内容；如需隐藏公告，请进入“侧栏布局”，关闭公告对应的显示位置。</p>`, "栏")}`);
+      </div>`)}
+      ${section("显示位置", "公告是否显示、显示在左侧栏、右侧栏或手机抽屉，由“其他管理 → 侧栏布局”中的“公告”开关控制。", `<p class="muted">这里负责公告内容；如需隐藏公告，请进入“侧栏布局”，关闭公告对应的显示位置。</p>`)}`);
   } catch (error) { toast(error.message, true); }
   finally { setBusy(false); }
 }
@@ -900,8 +1044,8 @@ async function openMusic(force = false) {
         ${inputField("播放器模式", "config.mode", m.mode, "select", { choices: ["local", "meting"] })}${inputField("悬浮入口模式", "config.floatingEntryMode", m.floatingEntryMode, "select", { choices: ["default", "fab"] })}
         ${inputField("网易云歌单 ID", "config.id", m.id, "text", { source: "musicPlayerConfig.id" })}${inputField("音乐平台", "config.server", m.server, "select", { choices: ["netease", "tencent", "kugou"] })}
         ${inputField("歌单类型", "config.type", m.type, "select", { choices: ["playlist", "album", "artist", "song"] })}${inputField("Meting API", "config.meting_api", m.meting_api, "url", { full: true })}
-      </div>`, "♫")}
-      ${section("本地歌曲", "歌曲文件与封面仍需放入博客仓库；这里负责图形化管理歌名、歌手、引用和时长。", `${arrayEditor("playlist", playlist.value || [], arraySchemas.playlist)}<p class="muted">如果 cover 或 url 使用 import 变量，请保留变量名，例如 sousakuCover。高级源码仍可用于新增 import。</p>`, "曲")}
+      </div>`)}
+      ${section("本地歌曲", "歌曲文件与封面仍需放入博客仓库；这里负责图形化管理歌名、歌手、引用和时长。", `${arrayEditor("playlist", playlist.value || [], arraySchemas.playlist)}<p class="muted">如果 cover 或 url 使用 import 变量，请保留变量名，例如 sousakuCover。高级源码仍可用于新增 import。</p>`)}
       <details class="advanced"><summary>高级说明：本地歌曲 import</summary><div><p>本地歌曲配置顶部的 import 语句不属于歌单数组。若新增了新的音频文件或封面变量，仍需在 constants.ts 顶部添加一次 import；已有歌曲的名称、歌手、时长和顺序可直接在这里修改。</p></div></details>`);
   } catch (error) { toast(error.message, true); }
   finally { setBusy(false); }
@@ -925,7 +1069,7 @@ function arrayEditor(id, items, schema) {
 
 function rawText(value) { return value && typeof value === "object" && typeof value.__raw === "string" ? value.__raw : value ?? ""; }
 function arrayRow(id, item, index, schema) {
-  if (item?.__raw) return `<div class="array-row" data-index="${index}" data-raw="${escapeHtml(item.__raw)}"><div><strong>预设条目</strong><p class="muted">${escapeHtml(item.__raw)}（保留源码引用）</p></div><button type="button" class="remove-row" aria-label="移除此条目" data-action="remove-row">⌫</button></div>`;
+  if (item?.__raw) return `<div class="array-row" data-index="${index}" data-raw="${escapeHtml(item.__raw)}"><div><strong>预设条目</strong><p class="muted">${escapeHtml(item.__raw)}（保留源码引用）</p></div>${removeRowButton()}</div>`;
   const fields = schema.map(([key, label, type, choices]) => {
     const value = rawText(item?.[key]);
     if (type === "boolean") return `<label class="toggle"><span>${escapeHtml(label)}</span><input data-key="${key}" data-kind="boolean" type="checkbox"${value ? " checked" : ""}></label>`;
@@ -934,7 +1078,7 @@ function arrayRow(id, item, index, schema) {
     const display = type === "list" && Array.isArray(value) ? value.join(", ") : value;
     return `<label>${escapeHtml(label)}<input data-key="${key}" data-kind="${type}" type="${["number", "date", "url", "color"].includes(type) ? type : "text"}" value="${escapeHtml(display)}"></label>`;
   }).join("");
-  return `<div class="array-row" data-index="${index}"><div class="array-fields">${fields}</div><button type="button" class="remove-row" aria-label="移除此条目" data-action="remove-row">⌫</button></div>`;
+  return `<div class="array-row" data-index="${index}"><div class="array-fields">${fields}</div>${removeRowButton()}</div>`;
 }
 
 function readArrayEditor(id, schema, previous = []) {
@@ -956,7 +1100,7 @@ function readArrayEditor(id, schema, previous = []) {
 
 function bannerGrid(paths, mode) {
   if (!paths?.length) return '<p class="muted">尚未添加图片。</p>';
-  return `<div class="image-grid">${paths.map((path, index) => `<figure class="image-card${mode === "mobile" ? " mobile" : ""}"><img src="${escapeHtml(imageUrl(path))}" alt="${escapeHtml(mode)} banner" loading="lazy"><figcaption class="image-path">${escapeHtml(path)}</figcaption><button type="button" class="remove-row" aria-label="移除此横幅" data-action="remove-banner" data-mode="${mode}" data-index="${index}">⌫</button></figure>`).join("")}</div>`;
+  return `<div class="image-grid">${paths.map((path, index) => `<figure class="image-card${mode === "mobile" ? " mobile" : ""}"><img src="${escapeHtml(imageUrl(path))}" alt="${escapeHtml(mode)} banner" loading="lazy"><figcaption class="image-path">${escapeHtml(path)}</figcaption><button type="button" class="remove-row" aria-label="移除此横幅" title="移除此横幅" data-action="remove-banner" data-mode="${mode}" data-index="${index}">${icon("close")}</button></figure>`).join("")}</div>`;
 }
 
 async function openBanner(force = false) {
@@ -971,7 +1115,7 @@ async function openBanner(force = false) {
       ${section("首页横幅图片", "Desktop 是电脑横幅，Mobile 是手机竖屏横幅。可直接从电脑上传或删除。", `<div class="image-manager">
         <div class="image-group-head"><div><strong>桌面端横幅（Desktop）</strong><p class="muted">推荐宽图，例如 1920×1080。</p></div><button type="button" class="upload-button" data-action="upload-banner" data-mode="desktop">⇧ 上传</button></div>${bannerGrid(desktop, "desktop")}
         <div class="image-group-head"><div><strong>移动端横幅（Mobile）</strong><p class="muted">推荐竖图，例如 1080×1920。</p></div><button type="button" class="upload-button" data-action="upload-banner" data-mode="mobile">⇧ 上传</button></div>${bannerGrid(mobile, "mobile")}
-      </div>`, "图")}
+      </div>`)}
       ${section("横幅行为", "调整裁切位置、轮播、水波、图片 API 和导航透明度。", `<div class="field-grid">
         ${inputField("图片位置", "site.banner.position", banner.position || "center", "select", { choices: ["top", "center", "bottom"], source: "banner.position" })}
         ${inputField("轮播间隔（秒）", "site.banner.carousel.interval", getPath(banner, "carousel.interval", 5), "number", { min: 1, source: "carousel.interval" })}
@@ -984,7 +1128,7 @@ async function openBanner(force = false) {
         ${inputField("启用图片 API", "site.banner.imageApi.enable", getPath(banner, "imageApi.enable", false), "boolean", { source: "imageApi.enable" })}
         ${inputField("图片 API 地址", "site.banner.imageApi.url", getPath(banner, "imageApi.url"), "url", { full: true, source: "imageApi.url" })}
         ${inputField("导航透明模式", "site.banner.navbar.transparentMode", getPath(banner, "navbar.transparentMode", "semifull"), "select", { choices: ["semi", "full", "semifull"] })}
-      </div>`, "调")}
+      </div>`)}
       ${section("首页标题", "设置横幅中央标题、副标题轮播和打字机速度。", `<div class="field-grid">
         ${inputField("显示首页标题", "site.banner.homeText.enable", getPath(banner, "homeText.enable", true), "boolean")}
         ${inputField("允许访客切换", "site.banner.homeText.switchable", getPath(banner, "homeText.switchable", true), "boolean")}
@@ -994,7 +1138,7 @@ async function openBanner(force = false) {
         ${inputField("打字速度 ms", "site.banner.homeText.typewriter.speed", getPath(banner, "homeText.typewriter.speed", 100), "number")}
         ${inputField("删除速度 ms", "site.banner.homeText.typewriter.deleteSpeed", getPath(banner, "homeText.typewriter.deleteSpeed", 50), "number")}
         ${inputField("暂停时间 ms", "site.banner.homeText.typewriter.pauseTime", getPath(banner, "homeText.typewriter.pauseTime", 2000), "number")}
-      </div>`, "T")}`);
+      </div>`)}`);
   } catch (error) { toast(error.message, true); }
   finally { setBusy(false); }
 }
@@ -1046,7 +1190,7 @@ async function openArraySection(id, force = false) {
   try {
     const model = await readModel(sectionInfo.path, sectionInfo.variable, force);
     state.model = { kind: "array", id, ...model };
-    showEditor(`${editorHead(`${sectionInfo.label}管理`, `${sectionInfo.path} · ${model.value.length} 个条目`)}${section(sectionInfo.label, "每个卡片代表博客页面上的一个条目；可新增、修改或删除。", arrayEditor(id, model.value, schema), sectionInfo.icon)}<details class="advanced"><summary>高级功能：查看完整 JSON 数据</summary><div><textarea class="code" readonly>${escapeHtml(JSON.stringify(model.value, null, 2))}</textarea></div></details>`);
+    showEditor(`${editorHead(`${sectionInfo.label}管理`, `${sectionInfo.path} · ${model.value.length} 个条目`)}${section(sectionInfo.label, "每个卡片代表博客页面上的一个条目；可新增、修改或删除。", arrayEditor(id, model.value, schema))}<details class="advanced"><summary>高级功能：查看完整 JSON 数据</summary><div><textarea class="code" readonly>${escapeHtml(JSON.stringify(model.value, null, 2))}</textarea></div></details>`);
   } catch (error) { toast(error.message, true); }
   finally { setBusy(false); }
 }
@@ -1073,7 +1217,7 @@ async function openDevices(force = false) {
     const model = await readModel(info.path, info.variable, force);
     const { rows, schema } = deviceRows(model.value);
     state.model = { kind: "devices", ...model, rows, schema };
-    showEditor(`${editorHead("设备展示管理", `${rows.length} 台设备`)}${section("设备列表", "分类名称会成为设备页面的分组标题；图片支持 public 目录路径或网络 URL。", arrayEditor("devices", rows, schema), "设")}`);
+    showEditor(`${editorHead("设备展示管理", `${rows.length} 台设备`)}${section("设备列表", "分类名称会成为设备页面的分组标题；图片支持 public 目录路径或网络 URL。", arrayEditor("devices", rows, schema))}`);
   } catch (error) { toast(error.message, true); }
   finally { setBusy(false); }
 }
@@ -1089,7 +1233,7 @@ async function saveDevices() {
 }
 
 function navbarItem(item, index) {
-  if (item?.__raw) return `<div class="array-row nav-item" data-index="${index}" data-raw="${escapeHtml(item.__raw)}"><div><strong>预设菜单</strong><p class="muted">${escapeHtml(item.__raw)}。预设项由主题源码定义，可删除但不建议直接改名。</p></div><button type="button" class="remove-row" aria-label="移除此条目" data-action="remove-row">⌫</button></div>`;
+  if (item?.__raw) return `<div class="array-row nav-item" data-index="${index}" data-raw="${escapeHtml(item.__raw)}"><div><strong>预设菜单</strong><p class="muted">${escapeHtml(item.__raw)}。预设项由主题源码定义，可删除但不建议直接改名。</p></div>${removeRowButton()}</div>`;
   const children = (item.children || []).map((child, childIndex) => navbarChild(child, childIndex)).join("");
   return `<div class="array-row nav-item" data-index="${index}"><div class="array-fields">
     <label>一级菜单名称<input data-key="name" value="${escapeHtml(item.name || "")}"></label>
@@ -1097,12 +1241,12 @@ function navbarItem(item, index) {
     <label class="wide">一级菜单图标<input data-key="icon" value="${escapeHtml(rawText(item.icon))}"></label>
     <label class="toggle"><span>外部链接</span><input data-key="external" data-kind="boolean" type="checkbox"${item.external ? " checked" : ""}></label>
     <div class="wide"><strong>二级菜单</strong><div class="array-list nav-children">${children}</div><button type="button" class="add-row" data-action="add-nav-child">＋ 添加二级菜单</button></div>
-  </div><button type="button" class="remove-row" aria-label="移除此条目" data-action="remove-row">⌫</button></div>`;
+  </div>${removeRowButton()}</div>`;
 }
 
 function navbarChild(child, index) {
-  if (child?.__raw) return `<div class="array-row nav-child" data-child-index="${index}" data-raw="${escapeHtml(child.__raw)}"><div><span class="muted">预设：</span>${escapeHtml(child.__raw)}</div><button type="button" class="remove-row" aria-label="移除此条目" data-action="remove-row">⌫</button></div>`;
-  return `<div class="array-row nav-child" data-child-index="${index}"><div class="array-fields"><label>名称<input data-key="name" value="${escapeHtml(child.name || "")}"></label><label>链接<input data-key="url" value="${escapeHtml(child.url || "")}"></label><label class="wide">图标<input data-key="icon" value="${escapeHtml(rawText(child.icon))}"></label><label class="toggle"><span>外部链接</span><input data-key="external" data-kind="boolean" type="checkbox"${child.external ? " checked" : ""}></label></div><button type="button" class="remove-row" aria-label="移除此条目" data-action="remove-row">⌫</button></div>`;
+  if (child?.__raw) return `<div class="array-row nav-child" data-child-index="${index}" data-raw="${escapeHtml(child.__raw)}"><div><span class="muted">预设：</span>${escapeHtml(child.__raw)}</div>${removeRowButton()}</div>`;
+  return `<div class="array-row nav-child" data-child-index="${index}"><div class="array-fields"><label>名称<input data-key="name" value="${escapeHtml(child.name || "")}"></label><label>链接<input data-key="url" value="${escapeHtml(child.url || "")}"></label><label class="wide">图标<input data-key="icon" value="${escapeHtml(rawText(child.icon))}"></label><label class="toggle"><span>外部链接</span><input data-key="external" data-kind="boolean" type="checkbox"${child.external ? " checked" : ""}></label></div>${removeRowButton()}</div>`;
 }
 
 async function openNavbar(force = false) {
@@ -1110,7 +1254,7 @@ async function openNavbar(force = false) {
   try {
     const model = await readModel("src/config/navBarConfig.ts", "navBarConfig", force);
     state.model = { kind: "navbar", ...model };
-    showEditor(`${editorHead("顶栏与菜单", "一级菜单及点击后出现的二级菜单")}${section("菜单结构", "按卡片顺序显示。预设项会保留为源码引用，自定义项可直接编辑。", `<div id="navbar-items" class="array-list">${(model.value.links || []).map(navbarItem).join("")}</div><button type="button" class="add-row" data-action="add-navbar">＋ 添加一级菜单</button>`, "☷")}<details class="advanced"><summary>高级功能：菜单 JSON 预览</summary><div><textarea class="code" readonly>${escapeHtml(JSON.stringify(model.value, null, 2))}</textarea></div></details>`);
+    showEditor(`${editorHead("顶栏与菜单", "一级菜单及点击后出现的二级菜单")}${section("菜单结构", "按卡片顺序显示。预设项会保留为源码引用，自定义项可直接编辑。", `<div id="navbar-items" class="array-list">${(model.value.links || []).map(navbarItem).join("")}</div><button type="button" class="add-row" data-action="add-navbar">＋ 添加一级菜单</button>`)}<details class="advanced"><summary>高级功能：菜单 JSON 预览</summary><div><textarea class="code" readonly>${escapeHtml(JSON.stringify(model.value, null, 2))}</textarea></div></details>`);
   } catch (error) { toast(error.message, true); }
   finally { setBusy(false); }
 }
@@ -1157,8 +1301,8 @@ async function openSidebar(force = false) {
     const model = await readModel("src/config/sidebarConfig.ts", "sidebarLayoutConfig", force);
     state.model = { kind: "sidebar", ...model };
     showEditor(`${editorHead("侧栏布局", "每个组件均可独立控制桌面左栏、右栏和移动端抽屉")}
-      ${section("侧栏组件", "勾选显示位置，使用上下箭头调整组件顺序。右侧栏内容在部分移动布局中不会显示。", `<div id="sidebar-components" class="array-list">${sidebarRows(model.value)}</div>`, "栏")}
-      ${section("默认动画", "控制侧栏卡片进入页面时的动画节奏。", `<div class="field-grid">${inputField("启用默认动画", "defaultAnimation.enable", getPath(model.value, "defaultAnimation.enable", true), "boolean")}${inputField("基础延迟 ms", "defaultAnimation.baseDelay", getPath(model.value, "defaultAnimation.baseDelay", 0), "number")}${inputField("递增延迟 ms", "defaultAnimation.increment", getPath(model.value, "defaultAnimation.increment", 50), "number")}</div>`, "动")}`);
+      ${section("侧栏组件", "勾选显示位置，使用上下箭头调整组件顺序。右侧栏内容在部分移动布局中不会显示。", `<div id="sidebar-components" class="array-list">${sidebarRows(model.value)}</div>`)}
+      ${section("默认动画", "控制侧栏卡片进入页面时的动画节奏。", `<div class="field-grid">${inputField("启用默认动画", "defaultAnimation.enable", getPath(model.value, "defaultAnimation.enable", true), "boolean")}${inputField("基础延迟 ms", "defaultAnimation.baseDelay", getPath(model.value, "defaultAnimation.baseDelay", 0), "number")}${inputField("递增延迟 ms", "defaultAnimation.increment", getPath(model.value, "defaultAnimation.increment", 50), "number")}</div>`)}`);
   } catch (error) { toast(error.message, true); }
   finally { setBusy(false); }
 }
@@ -1271,7 +1415,7 @@ async function handleEditorClick(event) {
     } else if (action === "add-social") {
       const list = $("#social-links");
       const index = list.children.length;
-      list.insertAdjacentHTML("beforeend", `<div class="array-row" data-index="${index}"><div class="array-fields"><label>显示名称<input data-key="name"></label><label>链接地址<input data-key="url"></label><label class="wide">图标名称<input data-key="icon" placeholder="例如 fa7-brands:github"></label></div><button type="button" class="remove-row" aria-label="移除此条目" data-action="remove-row">⌫</button></div>`);
+      list.insertAdjacentHTML("beforeend", `<div class="array-row" data-index="${index}"><div class="array-fields"><label>显示名称<input data-key="name"></label><label>链接地址<input data-key="url"></label><label class="wide">图标名称<input data-key="icon" placeholder="例如 fa7-brands:github"></label></div>${removeRowButton()}</div>`);
     } else if (action === "add-array") {
       addArrayRow(button.dataset.array);
     } else if (action === "delete-image") {
@@ -1392,7 +1536,7 @@ els.listToggle.addEventListener("click", () => {
   els.catalogBody.classList.toggle("hidden", !expanded);
 });
 els.dashboard.addEventListener("click", async event => {
-  const button = event.target.closest("button");
+  const button = event.target.closest("button[data-new-post], button[data-open-post], button[data-section], button[data-module]");
   if (!button || state.busy) return;
   setBusy(true);
   try {
@@ -1410,7 +1554,7 @@ els.dashboard.addEventListener("click", async event => {
 });
 
 async function init() {
-  const theme = localStorage.getItem("takiyu-admin-theme") || "light";
+  const theme = localStorage.getItem("takiyu-admin-theme") === "dark" ? "dark" : "light";
   setTheme(theme);
   window.addEventListener("beforeunload", event => { if (state.dirty) { event.preventDefault(); event.returnValue = ""; } });
   document.addEventListener("keydown", event => {
@@ -1422,7 +1566,7 @@ async function init() {
       else if (!event.shiftKey && document.activeElement === buttons.at(-1)) { event.preventDefault(); buttons[0].focus(); }
     }
   });
-  matchMedia("(max-width: 700px)").addEventListener("change", () => {
+  matchMedia("(max-width: 760px)").addEventListener("change", () => {
     setNavigation(false);
     els.catalogBody.classList.remove("hidden");
     els.listToggle.setAttribute("aria-expanded", "true");
